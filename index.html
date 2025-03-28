@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Магазин люкса</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+      }
+      header {
+        background: linear-gradient(135deg, #1a1a1a, #333);
+        color: white;
+        padding: 1rem 2rem;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+      }
+      .logo {
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .nav-menu {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+      }
+      .nav-menu a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+      .nav-menu a:hover {
+        color: #8a4af3;
+      }
+      .cart {
+        position: relative;
+        cursor: pointer;
+      }
+      .cart-icon {
+        font-size: 1.5rem;
+      }
+      .cart-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #8a4af3;
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+      }
+      .filters {
+        max-width: 1200px;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+      }
+      .filters select,
+      .filters input {
+        padding: 0.75rem;
+        font-size: 1rem;
+        border-radius: 25px;
+        border: none;
+        background: white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 300px;
+        transition: all 0.3s ease;
+      }
+      .filters select:focus,
+      .filters input:focus {
+        outline: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+      .product-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+      }
+      .product {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+      }
+      .product:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      }
+      .product img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+      }
+      .product h3 {
+        margin: 1rem 0 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #222;
+      }
+      .product p {
+        color: #666;
+        font-weight: 500;
+        font-size: 1.1rem;
+      }
+      .add-to-cart {
+        background: #8a4af3;
+        color: white;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: 25px;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+      .add-to-cart:hover {
+        background: #6b38c2;
+        transform: scale(1.05);
+      }
+      .loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.95);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      .loader div {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #8a4af3;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .theme-toggle {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+      .theme-toggle input {
+        display: none;
+      }
+      .theme-toggle label {
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      body.dark-theme {
+        background: #1a1a1a;
+        color: #f5f5f5;
+      }
+      body.dark-theme header {
+        background: linear-gradient(135deg, #333, #555);
+      }
+      body.dark-theme .product {
+        background: #2a2a2a;
+      }
+      body.dark-theme .product h3 {
+        color: #f5f5f5;
+      }
+      body.dark-theme .product p {
+        color: #ccc;
+      }
+      body.dark-theme .filters select,
+      body.dark-theme .filters input {
+        background: #333;
+        color: #f5f5f5;
+      }
+      .cart-sidebar {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 400px;
+        height: 100vh;
+        background: white;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease;
+        z-index: 2000;
+        padding: 2rem;
+        overflow-y: auto;
+      }
+      .cart-sidebar.active {
+        right: 0;
+      }
+      .cart-sidebar h2 {
+        margin-bottom: 1.5rem;
+        color: #333;
+      }
+      .cart-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+      }
+      .cart-item {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+      }
+      .cart-item img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 5px;
+      }
+      .cart-item-details {
+        flex: 1;
+      }
+      .cart-item h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+      }
+      .cart-item p {
+        color: #666;
+        font-weight: 500;
+      }
+      .cart-total {
+        margin-top: 2rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        z-index: 1500;
+      }
+      .overlay.active {
+        display: block;
+      }
+      .checkout-btn {
+        background: #8a4af3;
+        color: white;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: 25px;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+      .checkout-btn:hover {
+        background: #6b38c2;
+        transform: scale(1.05);
+      }
+      body.dark-theme .cart-sidebar {
+        background: #2a2a2a;
+        color: #f5f5f5;
+      }
+      body.dark-theme .cart-sidebar h2 {
+        color: #f5f5f5;
+      }
+      body.dark-theme .cart-item p {
+        color: #ccc;
+      }
+      @media (max-width: 768px) {
+        header {
+          padding: 1rem;
+          position: relative;
+        }
+        .nav-menu {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: #1a1a1a;
+          flex-direction: column;
+          padding: 1rem;
+          display: none;
+        }
+        .nav-menu.active {
+          display: flex;
+        }
+        .logo {
+          position: relative;
+        }
+        .logo::before {
+          content: "☰";
+          position: absolute;
+          right: 0.2rem;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 1.5rem;
+          cursor: pointer;
+        }
+        .filters {
+          padding: 0 1rem;
+          flex-direction: column;
+          align-items: center;
+        }
+        .filters select,
+        .filters input {
+          max-width: 100%;
+        }
+        .product-container {
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        .cart-sidebar {
+          width: 100%;
+          right: -100%;
+        }
+      }
+      @media (max-width: 480px) {
+        .product img {
+          height: 200px;
+        }
+        .product h3 {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loader" class="loader"><div></div></div>
+    <header data-aos="fade-down" data-aos-duration="1000">
+      <div class="logo">Магазин люкса</div>
+      <nav class="nav-menu">
+        <a href="#home">Главная</a><a href="#shop">Магазин</a
+        ><a href="#about">О нас</a>
+        <div class="cart">
+          <span class="cart-icon">🛒</span><span class="cart-count">0</span>
+        </div>
+      </nav>
+    </header>
+    <div
+      class="filters"
+      data-aos="fade-up"
+      data-aos-duration="1000"
+      data-aos-delay="200"
+    >
+      <select id="category-sort">
+        <option value="all">Все категории</option>
+        <option value="men">Мужская одежда</option>
+        <option value="women">Женская одежда</option></select
+      ><select id="price-sort">
+        <option value="default">Сортировать по цене</option>
+        <option value="low-high">От низкой к высокой</option>
+        <option value="high-low">От высокой к низкой</option></select
+      ><input type="text" id="name-filter" placeholder="Поиск товаров..." />
+    </div>
+    <main id="products" class="product-container"></main>
+    <div
+      class="cart-sidebar"
+      id="cartSidebar"
+      data-aos="fade-left"
+      data-aos-duration="800"
+    >
+      <button class="cart-close" id="cartClose">×</button>
+      <h2>Ваша корзина</h2>
+      <div id="cartItems"></div>
+      <div class="cart-total" id="cartTotal">Итого: $0.00</div>
+      <button class="checkout-btn" id="checkoutBtn">Оформить заказ</button>
+    </div>
+    <div class="overlay" id="overlay"></div>
+    <div
+      class="theme-toggle"
+      data-aos="fade-up"
+      data-aos-duration="1000"
+      data-aos-delay="400"
+    >
+      <input type="checkbox" id="theme-switch" /><label for="theme-switch"
+        >🌙</label
+      >
+    </div>
+    <script>
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100,
+        easing: "ease-in-out",
+      });
+      let products = [];
+      let cartCount = 0;
+      let cartItems = [];
+
+      async function fetchProducts() {
+        try {
+          const response = await fetch("https://fakestoreapi.com/products");
+          products = await response.json();
+          displayProducts(products);
+        } catch (error) {
+          console.error("Ошибка при загрузке товаров:", error);
+        } finally {
+          document.getElementById("loader").style.display = "none";
+        }
+      }
+
+      function displayProducts(productsList) {
+        const productsContainer = document.getElementById("products");
+        productsContainer.innerHTML = "";
+        productsList.forEach((product, index) => {
+          const productElement = document.createElement("div");
+          productElement.classList.add("product");
+          productElement.setAttribute("data-aos", "fade-up");
+          productElement.setAttribute("data-aos-delay", `${index * 50}`);
+          productElement.setAttribute("data-aos-duration", "1000");
+          productElement.innerHTML = `<img src="${product.image}" alt="${
+            product.title
+          }" loading="lazy"><h3>${product.title.substring(0, 50)}${
+            product.title.length > 50 ? "..." : ""
+          }</h3><p>$${product.price.toFixed(
+            2
+          )}</p><button class="add-to-cart" data-id="${
+            product.id
+          }">Добавить в корзину</button>`;
+          productsContainer.appendChild(productElement);
+        });
+      }
+
+      function updateCartDisplay() {
+        const cartItemsContainer = document.getElementById("cartItems");
+        cartItemsContainer.innerHTML = "";
+        let total = 0;
+
+        cartItems.forEach((item, index) => {
+          total += item.price;
+          const itemElement = document.createElement("div");
+          itemElement.classList.add("cart-item");
+          itemElement.setAttribute("data-aos", "fade-right");
+          itemElement.setAttribute("data-aos-delay", `${index * 100}`);
+          itemElement.setAttribute("data-aos-duration", "800");
+          itemElement.innerHTML = `
+            <img src="${item.image}" alt="${item.title}">
+            <div class="cart-item-details">
+              <h4>${item.title.substring(0, 30)}${
+            item.title.length > 30 ? "..." : ""
+          }</h4>
+              <p>$${item.price.toFixed(2)}</p>
+            </div>
+          `;
+          cartItemsContainer.appendChild(itemElement);
+        });
+
+        document.getElementById(
+          "cartTotal"
+        ).textContent = `Итого: $${total.toFixed(2)}`;
+        document.querySelector(".cart-count").textContent = cartCount;
+      }
+
+      function toggleCart() {
+        const cartSidebar = document.getElementById("cartSidebar");
+        const overlay = document.getElementById("overlay");
+        cartSidebar.classList.toggle("active");
+        overlay.classList.toggle("active");
+      }
+
+      document
+        .getElementById("category-sort")
+        .addEventListener("change", (e) => {
+          const category = e.target.value;
+          const filteredProducts =
+            category === "all"
+              ? products
+              : products.filter((p) => p.category.includes(category));
+          displayProducts(filteredProducts);
+        });
+
+      document.getElementById("price-sort").addEventListener("change", (e) => {
+        const sortType = e.target.value;
+        let sortedProducts = [...products];
+        if (sortType === "low-high") {
+          sortedProducts.sort((a, b) => a.price - b.price);
+        } else if (sortType === "high-low") {
+          sortedProducts.sort((a, b) => b.price - a.price);
+        }
+        displayProducts(sortedProducts);
+      });
+
+      document.getElementById("name-filter").addEventListener("input", (e) => {
+        const searchName = e.target.value.toLowerCase();
+        const filteredProducts = products.filter((p) =>
+          p.title.toLowerCase().includes(searchName)
+        );
+        displayProducts(filteredProducts);
+      });
+
+      document.addEventListener("click", (e) => {
+        if (e.target.classList.contains("add-to-cart")) {
+          const productId = e.target.dataset.id;
+          const product = products.find((p) => p.id == productId);
+          cartCount++;
+          cartItems.push(product);
+          updateCartDisplay();
+          e.target.textContent = "Добавлено!";
+          e.target.disabled = true;
+          setTimeout(() => {
+            e.target.textContent = "Добавить в корзину";
+            e.target.disabled = false;
+          }, 1000);
+        }
+      });
+
+      document.querySelector(".cart").addEventListener("click", toggleCart);
+      document
+        .getElementById("cartClose")
+        .addEventListener("click", toggleCart);
+      document.getElementById("overlay").addEventListener("click", toggleCart);
+
+      document.querySelector(".logo").addEventListener("click", () => {
+        document.querySelector(".nav-menu").classList.toggle("active");
+      });
+
+      document
+        .getElementById("theme-switch")
+        .addEventListener("change", (e) => {
+          document.body.classList.toggle("dark-theme", e.target.checked);
+        });
+
+      document.getElementById("checkoutBtn").addEventListener("click", () => {
+        if (cartItems.length === 0) {
+          alert("Ваша корзина пуста!");
+          return;
+        }
+        if (confirm("Хотите оформить заказ?")) {
+          localStorage.setItem("cartItems", JSON.stringify(cartItems));
+          window.location.href = "checkout.html";
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", fetchProducts);
+    </script>
+  </body>
+</html>
